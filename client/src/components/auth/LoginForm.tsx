@@ -15,7 +15,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     const res = await fetch("http://localhost:8000/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cpf, senha })  // cpf e senha
+      body: JSON.stringify({ cpf, senha })  
     });
     if (!res.ok) {
       setError("CPF ou senha inválidos");
