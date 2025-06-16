@@ -58,9 +58,12 @@ db.sqlite3
 # FastAPI / Uvicorn
 *.reload
 
-# Environment variables
-.env
-.env.*.local
+# Environment variables (somente na raiz de server/)
+# ignora apenas o .env e variantes locais dentro de server/
+# o slash força a raiz daquele diretório
+/.env
+/.env.*.local
+
 
 # IDEs and editors
 .vscode/
