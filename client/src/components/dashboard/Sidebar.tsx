@@ -1,16 +1,12 @@
-// src/components/dashboard/Sidebar.tsx
 "use client";
 import { useNavigation, ActiveComponentType } from '@/contexts/NavigationContext';
-// import Image from 'next/image';
 
-// Defina uma interface para os itens do menu
 interface MenuItem {
   name: string;
   componentName: ActiveComponentType;
   icon: JSX.Element;
 }
 
-// Interface para links externos
 interface ExternalLink {
   name: string;
   url: string;
@@ -19,7 +15,6 @@ interface ExternalLink {
 export default function Sidebar() {
   const { activeComponent, setActiveComponent } = useNavigation();
 
-  // Agora cada item tem o tipo componentName corretamente tipado
   const menuItems: MenuItem[] = [
     {
       name: 'Empreendimentos',
@@ -78,7 +73,6 @@ export default function Sidebar() {
     }
   ];
 
-  // Links externos
   const externalLinks: ExternalLink[] = [
     {
       name: "LopesNet Prontos",
@@ -93,7 +87,6 @@ export default function Sidebar() {
   return (
     <div className="bg-white shadow-lg w-64 min-h-[calc(100vh-64px)]">
       <div className="p-4">
-        {/* Botão voltar para início */}
         <button
           onClick={() => setActiveComponent('home')}
           className="w-full text-left mb-6 flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
@@ -121,10 +114,8 @@ export default function Sidebar() {
             </li>
           ))}
 
-          {/* Separador */}
           <li className="border-t border-gray-200 my-2"></li>
-          
-          {/* Links externos */}
+
           {externalLinks.map((link) => (
             <li key={link.name} className="mt-2">
               <a

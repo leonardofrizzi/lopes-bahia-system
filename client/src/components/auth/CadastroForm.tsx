@@ -4,15 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-// Defina a interface do usuário
-interface Usuario {
-  id: string;
-  nome: string;
-  cpf: string;
-  senha: string;
-  cargo: string;
-}
-
 export default function CadastroForm() {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
@@ -23,41 +14,38 @@ export default function CadastroForm() {
   const [cpfError, setCpfError] = useState('');
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validação das senhas
+
     if (senha !== confirmarSenha) {
       setSenhaError('As senhas não coincidem');
       return;
     }
-    
-    // Verificar se o CPF já está cadastrado
-    const usuariosString = localStorage.getItem('usuarios') || '[]';
-    const usuarios: Usuario[] = JSON.parse(usuariosString);
-    
-    const usuarioExistente = usuarios.find(u => u.cpf === cpf);
-    
-    if (usuarioExistente) {
-      setCpfError('CPF já cadastrado');
-      return;
+
+    try {
+      const response = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, email: cpf, senha, cargo })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        if (data.detail?.includes("Email")) setCpfError(data.detail);
+        return;
+      }
+
+      const data = await response.json();
+      const usuario = { nome, cpf, cargo, id: Date.now().toString() };
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+      localStorage.setItem("access_token", data.access_token);
+
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 100);
+    } catch (err) {
+      console.error("Erro ao cadastrar:", err);
     }
-    
-    // Criar novo usuário
-    const novoUsuario: Usuario = {
-      nome,
-      cpf,
-      senha,
-      cargo,
-      id: Date.now().toString()
-    };
-    
-    // Salvar no localStorage
-    usuarios.push(novoUsuario);
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-    
-    alert(`Cadastro realizado com sucesso para ${nome}`);
-    router.push('/login');
   };
 
   const inputStyle = {
@@ -67,7 +55,7 @@ export default function CadastroForm() {
     width: '100%',
     color: '#545454'
   };
-  
+
   const buttonStyle = {
     backgroundColor: '#eb194b',
     borderRadius: '20px',
@@ -101,7 +89,7 @@ export default function CadastroForm() {
             className="focus:outline-none"
           />
         </div>
-        
+
         <div>
           <input
             id="cpf"
@@ -119,7 +107,7 @@ export default function CadastroForm() {
           />
           {cpfError && <div style={errorStyle}>{cpfError}</div>}
         </div>
-        
+
         <div>
           <input
             id="senha"
@@ -136,7 +124,7 @@ export default function CadastroForm() {
             className="focus:outline-none"
           />
         </div>
-        
+
         <div>
           <input
             id="confirmarSenha"
@@ -154,7 +142,7 @@ export default function CadastroForm() {
           />
           {senhaError && <div style={errorStyle}>{senhaError}</div>}
         </div>
-        
+
         <div>
           <select
             id="cargo"
@@ -177,13 +165,13 @@ export default function CadastroForm() {
             className="focus:outline-none"
           >
             <option value="" disabled>Selecione seu cargo</option>
-            <option value="diretor">Diretor</option>
-            <option value="gerente">Gerente</option>
-            <option value="corretor">Corretor de imóveis</option>
-            <option value="operacional">Operacional</option>
+            <option value="Diretor">Diretor</option>
+            <option value="Gerente">Gerente</option>
+            <option value="Corretor de imóveis">Corretor de imóveis</option>
+            <option value="Operacional">Operacional</option>
           </select>
         </div>
-        
+
         <div className="mt-6 text-center">
           <button
             type="submit"
@@ -191,7 +179,7 @@ export default function CadastroForm() {
           >
             Cadastrar
           </button>
-          
+
           <div className="mt-4 text-center">
             <Link href="/login" style={{
               color: '#eb194b',
