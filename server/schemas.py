@@ -1,24 +1,26 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
-class User(BaseModel):
+class UserCreate(BaseModel):
     nome: str
-    email: EmailStr
+    cpf: str
     senha: str
     cargo: str
 
 class UserLogin(BaseModel):
-    email: str
+    cpf: str
     senha: str
-
-class UserInDB(BaseModel):
-    nome: str
-    email: str
-    hashed_password: str
-    cargo: str
 
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
 class TokenData(BaseModel):
-    email: str | None = None
+    cpf: str | None = None
+
+class UserOut(BaseModel):
+    nome: str
+    cpf: str
+    cargo: str
+
+class TokenWithUser(Token):
+    usuario: UserOut

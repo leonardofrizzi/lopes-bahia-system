@@ -1,4 +1,3 @@
-// src/app/(auth)/login/page.tsx
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -16,7 +15,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex justify-center items-center">
       <div className="flex min-w-[1140px] h-[600px]">
-        {/* Div da esquerda: Imagem de cinema sem background cinza */}
         <div className="w-1/2 flex items-center justify-center relative">
           <div className="relative h-full w-full">
             <Image
@@ -28,7 +26,6 @@ export default function LoginPage() {
               }}
               priority
             />
-            {/* Data e hora na parte inferior */}
             <div className="absolute bottom-6 inset-x-0 text-center">
               <div className="inline-block text-white text-[18px]">
                 <div>{formattedDay.charAt(0).toUpperCase() + formattedDay.slice(1)}</div>
@@ -38,7 +35,6 @@ export default function LoginPage() {
           </div>
         </div>
         
-        {/* Div da direita: Formulário de login */}
         <div className="w-1/2 flex items-center justify-end bg-white">
           <div className="max-w-md w-full">
             <h2 className="text-center text-[30px] font-bold text-[#eb194b]">Efetuar Login</h2>
