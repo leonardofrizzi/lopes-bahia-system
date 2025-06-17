@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class UserCreate(BaseModel):
     nome: str
@@ -24,3 +25,19 @@ class UserOut(BaseModel):
 
 class TokenWithUser(Token):
     usuario: UserOut
+
+class EmpreendimentoCreate(BaseModel):
+    id: Optional[str] = None
+    nome: str
+    tipo_imovel: str
+    dormitorios: Optional[int] = None
+    suites: Optional[int] = None
+    vagas: Optional[int] = None
+    area_m2: Optional[float] = None
+    data_entrega: Optional[str] = None
+    endereco: Optional[str] = None
+    bairro: Optional[str] = None
+    incorporador: Optional[str] = None
+    coordenador: Optional[str] = None
+    link_book: Optional[str] = None
+    link_tabela: Optional[str] = None

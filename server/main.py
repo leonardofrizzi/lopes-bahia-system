@@ -14,10 +14,9 @@ print(f"[*] JWT settings -> SECRET_KEY: {'*' * 8} (hidden), ALGORITHM: {ALGORITH
 title = "Sistema Lopes Bahia Backend"
 app = FastAPI(title=title)
 
-title
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Para dev, depois restringir
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,9 +24,13 @@ app.add_middleware(
 
 from routes.auth import router as auth_router
 from routes.protected import router as protected_router
+from routes.videos import router as videos_router
+from routes.empreendimentos import router as emp_router
 
 app.include_router(auth_router, prefix="/auth")
 app.include_router(protected_router, prefix="/area-segura")
+app.include_router(videos_router, prefix="/videos")
+app.include_router(emp_router, prefix="/empreendimentos")
 
 @app.get("/", tags=["status"])
 def root():

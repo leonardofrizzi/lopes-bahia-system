@@ -1,51 +1,124 @@
-// src/components/dashboard/EmDesenvolvimentoComponent.tsx
-"use client";
-import { useRouter } from 'next/navigation';
-import { useNavigation } from '@/contexts/NavigationContext';
+'use client'
+import { useState } from 'react'
+import EmpreendimentoForm from '../empreendimentos/EmpreendimentoForm'
 
-export default function EmDesenvolvimentoComponent({ titulo }: { titulo: string }) {
-  const router = useRouter();
-  const { setActiveComponent } = useNavigation();
+interface Empreendimento {
+  id: string
+  produto: string
+  dormitórios: number
+  suítes: number
+  vagas: number
+  área: string
+  dataEntrega: string
+  endereço: string
+  bairro: string
+  incorporador: string
+  coordenador: string
+}
 
-  const voltarParaInicio = () => {
-    // Primeiro definir o componente ativo como 'home'
-    setActiveComponent('home');
-    
-    // Em seguida, usar um timeout curto antes de navegar para o dashboard
-    // Isso dá tempo ao estado de ser atualizado antes da navegação
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 50);
-  };
+type Filtros = {
+  bairro: string
+  estagio: string
+  tipo: string
+  nome: string
+}
+
+export default function EmpreendimentosComponent() {
+  const [filtros, setFiltros] = useState<Filtros>({
+    bairro: '',
+    estagio: '',
+    tipo: '',
+    nome: '',
+  })
+  const [resultados, setResultados] = useState<Empreendimento[]>([])
+
+  const handleBuscar = (valores: Filtros) => {
+    setFiltros(valores)
+
+    const mock: Empreendimento[] = [
+      {
+        id: '1',
+        produto: 'Villaggio Jardins',
+        dormitórios: 3,
+        suítes: 1,
+        vagas: 2,
+        área: '113.00 a 142.00m²',
+        dataEntrega: '01/05/2027',
+        endereço: 'Rua Leonor Calmon',
+        bairro: 'Cidade Jardim',
+        incorporador: 'Prima',
+        coordenador: 'Daniela • 71 9 9999 9999',
+      },
+      {
+        id: '2',
+        produto: 'Rivê',
+        dormitórios: 2,
+        suítes: 1,
+        vagas: 1,
+        área: '97.00 a 143.00m²',
+        dataEntrega: '01/04/2028',
+        endereço: 'Rua do Rio Vermelho',
+        bairro: 'Rio Vermelho',
+        incorporador: 'Moura Dubeux',
+        coordenador: 'Caio • 71 9 9999 9999',
+      },
+    ]
+    setResultados(mock)
+  }
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">{titulo}</h1>
-      
-      <div className="bg-white rounded-lg shadow-md p-12 text-center">
-        <div className="flex flex-col items-center justify-center">
-          {/* Ícone de construção */}
-          <div className="mb-6 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-          </div>
-          
-          <h2 className="text-2xl font-bold text-[#eb194b] mb-4">Módulo em Desenvolvimento</h2>
-          
-          <p className="text-gray-600 max-w-lg mx-auto">
-            Este módulo está atualmente em desenvolvimento e estará disponível em breve.
-            Estamos trabalhando para entregar a melhor experiência possível.
-          </p>
-          
-          <button
-            onClick={voltarParaInicio}
-            className="mt-8 px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-gray-700 transition-colors"
-          >
-            Voltar para Início
-          </button>
-        </div>
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold text-[#eb194b]">Buscar Empreendimentos</h2>
+      <div className="p-6 bg-white rounded-lg shadow">
+        <EmpreendimentoForm onBuscar={handleBuscar} />
       </div>
+      {resultados.length > 0 && (
+        <div className="mt-6 bg-white rounded-lg shadow p-6">
+          <h3 className="text-xl font-semibold text-gray-800">Resultado da Consulta</h3>
+          <div className="overflow-auto mt-4">
+            <table className="min-w-full table-auto">
+              <thead className="bg-[#eb194b] text-white">
+                <tr>
+                  <th className="px-4 py-2 text-left">Produto</th>
+                  <th className="px-4 py-2">Dorms</th>
+                  <th className="px-4 py-2">Suítes</th>
+                  <th className="px-4 py-2">Vagas</th>
+                  <th className="px-4 py-2 text-left">Área</th>
+                  <th className="px-4 py-2">Entrega</th>
+                  <th className="px-4 py-2 text-left">Endereço</th>
+                  <th className="px-4 py-2 text-left">Bairro</th>
+                  <th className="px-4 py-2 text-left">Incorporador</th>
+                  <th className="px-4 py-2 text-left">Coordenador</th>
+                  <th className="px-4 py-2"></th>
+                  <th className="px-4 py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {resultados.map((e) => (
+                  <tr key={e.id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-2 font-medium text-gray-700">{e.produto}</td>
+                    <td className="px-4 py-2 text-center">{e.dormitórios}</td>
+                    <td className="px-4 py-2 text-center">{e.suítes}</td>
+                    <td className="px-4 py-2 text-center">{e.vagas}</td>
+                    <td className="px-4 py-2 text-gray-600">{e.área}</td>
+                    <td className="px-4 py-2 text-center">{e.dataEntrega}</td>
+                    <td className="px-4 py-2 text-gray-600">{e.endereço}</td>
+                    <td className="px-4 py-2 text-gray-600">{e.bairro}</td>
+                    <td className="px-4 py-2 text-gray-600">{e.incorporador}</td>
+                    <td className="px-4 py-2 text-gray-600">{e.coordenador}</td>
+                    <td className="px-4 py-2">
+                      <button className="bg-[#eb194b] text-white px-3 py-1 rounded hover:bg-red-600">Book</button>
+                    </td>
+                    <td className="px-4 py-2">
+                      <button className="bg-[#eb194b] text-white px-3 py-1 rounded hover:bg-red-600">Tabela</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
-  );
+  )
 }
