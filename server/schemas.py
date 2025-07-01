@@ -1,3 +1,4 @@
+# schemas.py
 from pydantic import BaseModel
 from typing import Optional
 
@@ -16,7 +17,7 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 class TokenData(BaseModel):
-    cpf: str | None = None
+    cpf: Optional[str] = None
 
 class UserOut(BaseModel):
     nome: str
@@ -35,6 +36,24 @@ class EmpreendimentoCreate(BaseModel):
     vagas: Optional[int] = None
     area_m2: Optional[float] = None
     data_entrega: Optional[str] = None
+    estagio: Optional[str] = None
+    endereco: Optional[str] = None
+    bairro: Optional[str] = None
+    incorporador: Optional[str] = None
+    coordenador: Optional[str] = None
+    link_book: Optional[str] = None
+    link_tabela: Optional[str] = None
+
+class EmpreendimentoOut(BaseModel):
+    id: str
+    nome: str
+    tipo_imovel: str
+    dormitorios: Optional[int] = None
+    suites: Optional[int] = None
+    vagas: Optional[int] = None
+    area_m2: Optional[float] = None
+    data_entrega: Optional[str] = None
+    estagio: Optional[str] = None
     endereco: Optional[str] = None
     bairro: Optional[str] = None
     incorporador: Optional[str] = None

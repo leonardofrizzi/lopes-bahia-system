@@ -1,16 +1,17 @@
 'use client'
-import { useState } from 'react'
-import EmpreendimentoForm from '../empreendimentos/EmpreendimentoForm'
 
-interface Empreendimento {
+import { useState, useEffect } from 'react'
+import EmpreendimentoForm from '@/components/empreendimentos/EmpreendimentoForm'
+
+export interface Empreendimento {
   id: string
-  produto: string
-  dormitórios: number
-  suítes: number
+  nome: string
+  dormitorios: number
+  suites: number
   vagas: number
-  área: string
-  dataEntrega: string
-  endereço: string
+  area_m2: number
+  data_entrega: string
+  endereco: string
   bairro: string
   incorporador: string
   coordenador: string
@@ -24,94 +25,120 @@ type Filtros = {
 }
 
 export default function EmpreendimentosComponent() {
-  const [filtros, setFiltros] = useState<Filtros>({
-    bairro: '',
-    estagio: '',
-    tipo: '',
-    nome: '',
-  })
   const [resultados, setResultados] = useState<Empreendimento[]>([])
+  const [options, setOptions] = useState<{
+    bairros: string[]
+    estagios: string[]
+    tipos: string[]
+    nomes: string[]
+  }>({ bairros: [], estagios: [], tipos: [], nomes: [] })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string>('')
 
-  const handleBuscar = (valores: Filtros) => {
-    setFiltros(valores)
+  // preenche os selects com valores únicos vindos da API
+  useEffect(() => {
+    fetch('http://localhost:8000/empreendimentos', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+    })
+      .then(res => (res.ok ? res.json() : Promise.reject()))
+      .then((data: Empreendimento[]) => {
+        const bairros = Array.from(new Set(data.map(e => e.bairro))).filter(Boolean)
+        const estagios = Array.from(new Set(data.map(e => e.data_entrega))).filter(Boolean)
+        const tipos = Array.from(new Set(data.map(e => e.nome))).filter(Boolean)
+        const nomes = Array.from(new Set(data.map(e => e.nome))).filter(Boolean)
+        setOptions({ bairros, estagios, tipos, nomes })
+      })
+      .catch(() => {})
+  }, [])
 
-    const mock: Empreendimento[] = [
-      {
-        id: '1',
-        produto: 'Villaggio Jardins',
-        dormitórios: 3,
-        suítes: 1,
-        vagas: 2,
-        área: '113.00 a 142.00m²',
-        dataEntrega: '01/05/2027',
-        endereço: 'Rua Leonor Calmon',
-        bairro: 'Cidade Jardim',
-        incorporador: 'Prima',
-        coordenador: 'Daniela • 71 9 9999 9999',
-      },
-      {
-        id: '2',
-        produto: 'Rivê',
-        dormitórios: 2,
-        suítes: 1,
-        vagas: 1,
-        área: '97.00 a 143.00m²',
-        dataEntrega: '01/04/2028',
-        endereço: 'Rua do Rio Vermelho',
-        bairro: 'Rio Vermelho',
-        incorporador: 'Moura Dubeux',
-        coordenador: 'Caio • 71 9 9999 9999',
-      },
-    ]
-    setResultados(mock)
+  const handleBuscar = async (valores: Filtros) => {
+    setLoading(true)
+    setError('')
+    try {
+      const params = new URLSearchParams()
+      if (valores.nome) params.append('nome', valores.nome)
+      if (valores.bairro) params.append('bairro', valores.bairro)
+      if (valores.tipo) params.append('tipo_imovel', valores.tipo)
+      if (valores.estagio) params.append('estagio', valores.estagio)
+
+      const res = await fetch(
+        `http://localhost:8000/empreendimentos?${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+        }
+      )
+      if (!res.ok) throw new Error('Erro ao buscar empreendimentos')
+      const data: Empreendimento[] = await res.json()
+      setResultados(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-2xl font-bold text-[#eb194b]">Buscar Empreendimentos</h2>
-      <div className="p-6 bg-white rounded-lg shadow">
-        <EmpreendimentoForm onBuscar={handleBuscar} />
+    <div className="p-6 bg-gray-50 min-h-full">
+      <h2 className="text-3xl font-bold text-[#eb194b] mb-6">
+        Buscar Empreendimentos
+      </h2>
+
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <EmpreendimentoForm
+          onBuscar={handleBuscar}
+          bairros={options.bairros}
+          estagios={options.estagios}
+          tipos={options.tipos}
+          nomes={options.nomes}
+        />
       </div>
-      {resultados.length > 0 && (
-        <div className="mt-6 bg-white rounded-lg shadow p-6">
-          <h3 className="text-xl font-semibold text-gray-800">Resultado da Consulta</h3>
-          <div className="overflow-auto mt-4">
-            <table className="min-w-full table-auto">
+
+      {loading && (
+        <div className="text-center text-gray-600 mb-4">Carregando...</div>
+      )}
+      {error && (
+        <div className="text-center text-red-600 mb-4">{error}</div>
+      )}
+
+      {resultados.length > 0 && !loading && (
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+            Resultado da Consulta
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto border-collapse">
               <thead className="bg-[#eb194b] text-white">
                 <tr>
-                  <th className="px-4 py-2 text-left">Produto</th>
-                  <th className="px-4 py-2">Dorms</th>
-                  <th className="px-4 py-2">Suítes</th>
-                  <th className="px-4 py-2">Vagas</th>
-                  <th className="px-4 py-2 text-left">Área</th>
-                  <th className="px-4 py-2">Entrega</th>
-                  <th className="px-4 py-2 text-left">Endereço</th>
-                  <th className="px-4 py-2 text-left">Bairro</th>
-                  <th className="px-4 py-2 text-left">Incorporador</th>
-                  <th className="px-4 py-2 text-left">Coordenador</th>
-                  <th className="px-4 py-2"></th>
-                  <th className="px-4 py-2"></th>
+                  <th className="px-6 py-3 text-left">Nome</th>
+                  <th className="px-6 py-3">Dorms</th>
+                  <th className="px-6 py-3">Suítes</th>
+                  <th className="px-6 py-3">Vagas</th>
+                  <th className="px-6 py-3 text-left">Área (m²)</th>
+                  <th className="px-6 py-3">Entrega</th>
+                  <th className="px-6 py-3 text-left">Endereço</th>
+                  <th className="px-6 py-3 text-left">Bairro</th>
+                  <th className="px-6 py-3 text-left">Incorporador</th>
+                  <th className="px-6 py-3 text-left">Coordenador</th>
                 </tr>
               </thead>
               <tbody>
-                {resultados.map((e) => (
-                  <tr key={e.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-2 font-medium text-gray-700">{e.produto}</td>
-                    <td className="px-4 py-2 text-center">{e.dormitórios}</td>
-                    <td className="px-4 py-2 text-center">{e.suítes}</td>
-                    <td className="px-4 py-2 text-center">{e.vagas}</td>
-                    <td className="px-4 py-2 text-gray-600">{e.área}</td>
-                    <td className="px-4 py-2 text-center">{e.dataEntrega}</td>
-                    <td className="px-4 py-2 text-gray-600">{e.endereço}</td>
-                    <td className="px-4 py-2 text-gray-600">{e.bairro}</td>
-                    <td className="px-4 py-2 text-gray-600">{e.incorporador}</td>
-                    <td className="px-4 py-2 text-gray-600">{e.coordenador}</td>
-                    <td className="px-4 py-2">
-                      <button className="bg-[#eb194b] text-white px-3 py-1 rounded hover:bg-red-600">Book</button>
+                {resultados.map(e => (
+                  <tr
+                    key={e.id}
+                    className="bg-white hover:bg-gray-100 transition-colors"
+                  >
+                    <td className="px-6 py-4 font-medium text-gray-700">
+                      {e.nome}
                     </td>
-                    <td className="px-4 py-2">
-                      <button className="bg-[#eb194b] text-white px-3 py-1 rounded hover:bg-red-600">Tabela</button>
-                    </td>
+                    <td className="px-6 py-4 text-center">{e.dormitorios}</td>
+                    <td className="px-6 py-4 text-center">{e.suites}</td>
+                    <td className="px-6 py-4 text-center">{e.vagas}</td>
+                    <td className="px-6 py-4 text-gray-600">{e.area_m2}</td>
+                    <td className="px-6 py-4 text-center">{e.data_entrega}</td>
+                    <td className="px-6 py-4 text-gray-600">{e.endereco}</td>
+                    <td className="px-6 py-4 text-gray-600">{e.bairro}</td>
+                    <td className="px-6 py-4 text-gray-600">{e.incorporador}</td>
+                    <td className="px-6 py-4 text-gray-600">{e.coordenador}</td>
                   </tr>
                 ))}
               </tbody>
