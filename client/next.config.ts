@@ -1,9 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',  // Garantir que o site será exportado como estático
-  images: {
-    unoptimized: true,  // Desabilita a otimização de imagens
+  // ensure Next.js spins up a server for API routes
+  output: 'standalone',
+  experimental: {
+    appDir: true,
   },
 }
 
-module.exports = nextConfig;
+module.exports = nextConfig

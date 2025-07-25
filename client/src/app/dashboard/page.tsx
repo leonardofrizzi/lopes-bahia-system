@@ -9,6 +9,7 @@ import EmpreendimentosComponent from '@/components/dashboard/EmpreendimentosComp
 import LinksUteisComponent from '@/components/dashboard/LinksUteisComponent';
 import EmDesenvolvimentoComponent from '@/components/dashboard/EmDesenvolvimentoComponent';
 import CapacitacaoComponent from '@/components/dashboard/CapacitacaoComponent';
+import OfertaAtiva from '@/components/dashboard/OfertaAtiva';
 
 interface UsuarioLogado {
   id: string;
@@ -128,9 +129,10 @@ export default function DashboardPage() {
     </div>
   );
 
-  const OfertaAtivaComponent = () => <EmDesenvolvimentoComponent titulo="Oferta Ativa" />;
+
   const MarketingComponent = () => <EmDesenvolvimentoComponent titulo="Marketing" />;
   const ConfiguracaoComponent = () => <EmDesenvolvimentoComponent titulo="Configuração" />;
+  const OfertaAtivaComponent = () => <OfertaAtiva titulo="Oferta Ativa" />;
 
   const renderContent = () => {
     switch (activeComponent) {
