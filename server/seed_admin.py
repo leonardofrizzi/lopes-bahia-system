@@ -1,20 +1,20 @@
-import os
-from dotenv import load_dotenv
+from settings import settings
+import sys
+print("[DEBUG] sys.path =", sys.path)
+
 import boto3
 from botocore.exceptions import ClientError
 from auth import hash_password
 
-load_dotenv()
-
-ADMIN_CPF      = os.getenv("ADMIN_CPF")
-ADMIN_NOME     = os.getenv("ADMIN_NOME")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_CPF      = settings.admin_cpf
+ADMIN_NOME     = settings.admin_nome
+ADMIN_PASSWORD = settings.admin_password
 
 dynamodb = boto3.resource(
     "dynamodb",
-    region_name=os.getenv("AWS_REGION"),
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name=settings.aws_region,
+    aws_access_key_id=settings.aws_access_key_id,
+    aws_secret_access_key=settings.aws_secret_access_key,
 )
 table = dynamodb.Table("usuarios")
 
@@ -29,7 +29,7 @@ def seed_admin():
         Item={
             "cpf": ADMIN_CPF,
             "nome": ADMIN_NOME,
-            "cargo": "Administrador",      # valor fixo
+            "cargo": "Administrador",
             "hashed_password": hashed,
         }
     )
