@@ -1,4 +1,3 @@
-# schemas.py
 from pydantic import BaseModel
 from typing import Optional
 
@@ -23,6 +22,7 @@ class UserOut(BaseModel):
     nome: str
     cpf: str
     cargo: str
+    role: str
 
 class TokenWithUser(Token):
     usuario: UserOut

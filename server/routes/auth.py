@@ -32,9 +32,20 @@ def register(user: UserCreate, current_cpf: str = Depends(get_current_cpf)):
     if "Item" in resp:
         raise HTTPException(status_code=400, detail="CPF já cadastrado")
     hashed = hash_password(user.senha)
-    item = {"cpf": user.cpf, "nome": user.nome, "cargo": user.cargo, "hashed_password": hashed}
+    item = {
+        "cpf": user.cpf,
+        "nome": user.nome,
+        "cargo": user.cargo,
+        "hashed_password": hashed,
+        "role": "corretor"  # ou outro valor padrão que queira
+    }
     usuarios_table.put_item(Item=item)
-    return UserOut(**item)
+    return UserOut(
+        nome=item["nome"],
+        cpf=item["cpf"],
+        cargo=item["cargo"],
+        role=item["role"]
+    )
 
 @router.post("/login", response_model=TokenWithUser)
 def login(user: UserLogin):
@@ -43,5 +54,14 @@ def login(user: UserLogin):
     if not item or not verify_password(user.senha, item["hashed_password"]):
         raise HTTPException(status_code=401, detail="CPF ou senha inválidos")
     token = create_access_token({"sub": user.cpf})
-    usuario_out = {"nome": item["nome"], "cpf": item["cpf"], "cargo": item.get("cargo", "")}    
-    return {"access_token": token, "token_type": "bearer", "usuario": usuario_out}
+    usuario_out = UserOut(
+        nome=item["nome"],
+        cpf=item["cpf"],
+        cargo=item.get("cargo", ""),
+        role=item.get("role", "")
+    )
+    return TokenWithUser(
+        access_token=token,
+        token_type="bearer",
+        usuario=usuario_out
+    )

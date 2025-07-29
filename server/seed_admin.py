@@ -1,7 +1,4 @@
 from settings import settings
-import sys
-print("[DEBUG] sys.path =", sys.path)
-
 import boto3
 from botocore.exceptions import ClientError
 from auth import hash_password
@@ -9,6 +6,7 @@ from auth import hash_password
 ADMIN_CPF      = settings.admin_cpf
 ADMIN_NOME     = settings.admin_nome
 ADMIN_PASSWORD = settings.admin_password
+ADMIN_ROLE     = settings.admin_role  # já vindo do .env
 
 dynamodb = boto3.resource(
     "dynamodb",
@@ -19,21 +17,37 @@ dynamodb = boto3.resource(
 table = dynamodb.Table("usuarios")
 
 def seed_admin():
-    resp = table.get_item(Key={"cpf": ADMIN_CPF})
-    if "Item" in resp:
-        print(f"[seed_admin] Administrador já existe (CPF={ADMIN_CPF}).")
+    try:
+        resp = table.get_item(Key={"cpf": ADMIN_CPF})
+    except ClientError as e:
+        print("[seed_admin] erro ao buscar item:", e)
         return
 
-    hashed = hash_password(ADMIN_PASSWORD)
-    table.put_item(
-        Item={
-            "cpf": ADMIN_CPF,
-            "nome": ADMIN_NOME,
-            "cargo": "Administrador",
-            "hashed_password": hashed,
-        }
-    )
-    print(f"[seed_admin] Administrador criado: {ADMIN_NOME} ({ADMIN_CPF})")
+    if "Item" in resp:
+        item = resp["Item"]
+        # se o role for diferente ou não existir, atualiza:
+        if item.get("role") != ADMIN_ROLE:
+            table.update_item(
+                Key={"cpf": ADMIN_CPF},
+                UpdateExpression="SET #r = :r",
+                ExpressionAttributeNames={"#r": "role"},
+                ExpressionAttributeValues={":r": ADMIN_ROLE},
+            )
+            print(f"[seed_admin] Atualizei o role do admin para '{ADMIN_ROLE}'.")
+        else:
+            print(f"[seed_admin] Administrador já existe com o role correto (CPF={ADMIN_CPF}).")
+    else:
+        # insere o admin pela primeira vez
+        hashed = hash_password(ADMIN_PASSWORD)
+        table.put_item(
+            Item={
+                "cpf": ADMIN_CPF,
+                "nome": ADMIN_NOME,
+                "role": ADMIN_ROLE,
+                "hashed_password": hashed,
+            }
+        )
+        print(f"[seed_admin] Administrador criado: {ADMIN_NOME} ({ADMIN_CPF}) com role '{ADMIN_ROLE}'.")
 
 if __name__ == "__main__":
     seed_admin()
