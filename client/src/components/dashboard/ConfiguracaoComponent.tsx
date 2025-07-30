@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import AddUserModal from '@/components/configuracoes/AddUserModal';
 import EditUserModal, { User as EditUserType } from '@/components/configuracoes/EditUserModal';
 import AddEmpreendimentoModal from '@/components/configuracoes/AddEmpreendimentoModal';
+import EditEmpreendimentoModal, { Empreendimento as EmpType } from '@/components/configuracoes/EditEmpreendimentoModal';
 
 // Tipagem de usuário
 type User = {
@@ -54,7 +55,9 @@ export default function ConfiguracaoComponent() {
   const [showEditUser, setShowEditUser] = useState(false);
   const [editingUser, setEditingUser]   = useState<EditUserType | null>(null);
 
-  const [showAddEmp, setShowAddEmp]     = useState(false);
+  const [showAddEmp, setShowAddEmp]       = useState(false);
+  const [showEditEmp, setShowEditEmp]     = useState(false);
+  const [editingEmp, setEditingEmp]       = useState<EmpType | null>(null);
 
   const token = localStorage.getItem('access_token') || '';
 
@@ -95,6 +98,7 @@ export default function ConfiguracaoComponent() {
             onClick={() => setView(ConfigView.USERS)}
             className="cursor-pointer bg-white rounded-lg shadow p-6 hover:shadow-lg transition flex flex-col items-center"
           >
+            {/* ícone usuário */}
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M5.121 17.804A12.044 12.044 0 0112 15c2.396 0 4.634.628 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -107,6 +111,7 @@ export default function ConfiguracaoComponent() {
             onClick={() => setView(ConfigView.EMPREENDIMENTOS)}
             className="cursor-pointer bg-white rounded-lg shadow p-6 hover:shadow-lg transition flex flex-col items-center"
           >
+            {/* ícone casa */}
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
@@ -143,32 +148,67 @@ export default function ConfiguracaoComponent() {
                 <td className="px-4 py-2">{u.cpf}</td>
                 <td className="px-4 py-2">{u.cargo}</td>
                 <td className="px-4 py-2 space-x-2">
-                  <button onClick={() => { setEditingUser(u as EditUserType); setShowEditUser(true); }}
-                    className="text-blue-600 hover:underline text-sm">Editar</button>
-                  <button onClick={async () => {
+                  <button
+                    onClick={() => {
+                      setEditingUser(u as EditUserType);
+                      setShowEditUser(true);
+                    }}
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={async () => {
                       if (!confirm('Deseja remover este usuário?')) return;
-                      const res = await fetch(`/api/users/${u.cpf}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
+                      const res = await fetch(`/api/users/${u.cpf}`, {
+                        method: 'DELETE',
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
                       if (res.ok) setUsers(prev => prev.filter(x => x.cpf !== u.cpf));
                     }}
-                    className="text-red-600 hover:underline text-sm">Remover</button>
+                    className="text-red-600 hover:underline text-sm"
+                  >
+                    Remover
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         <div className="mt-6">
-          <button onClick={() => setShowAddUser(true)}
-            className="bg-[#eb194b] text-white font-semibold px-6 py-2 rounded hover:bg-[#c3133d] transition">
+          <button
+            onClick={() => setShowAddUser(true)}
+            className="bg-[#eb194b] text-white font-semibold px-6 py-2 rounded hover:bg-[#c3133d] transition"
+          >
             Novo Usuário
           </button>
         </div>
-        {showAddUser && <AddUserModal isOpen onClose={()=>setShowAddUser(false)} onAdded={newU => {setUsers(u=>[newU, ...u]); setShowAddUser(false);}} />}
-        {showEditUser && editingUser && <EditUserModal isOpen user={editingUser} onClose={()=>setShowEditUser(false)} onUpdated={upd=>{setUsers(u=>u.map(x=>x.cpf===upd.cpf?upd:x)); setShowEditUser(false);}} />}
+        {showAddUser && (
+          <AddUserModal
+            isOpen
+            onClose={() => setShowAddUser(false)}
+            onAdded={newU => {
+              setUsers(prev => [newU, ...prev]);
+              setShowAddUser(false);
+            }}
+          />
+        )}
+        {showEditUser && editingUser && (
+          <EditUserModal
+            isOpen
+            user={editingUser}
+            onClose={() => setShowEditUser(false)}
+            onUpdated={upd => {
+              setUsers(prev => prev.map(x => (x.cpf === upd.cpf ? upd : x)));
+              setShowEditUser(false);
+            }}
+          />
+        )}
       </div>
     );
   }
 
-  // --- EMPRND VIEW ---
+  // --- EMPREENDIMENTOS VIEW ---
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <button onClick={() => setView(ConfigView.OVERVIEW)} className="mb-4 text-sm text-gray-600 hover:underline">
@@ -176,7 +216,6 @@ export default function ConfiguracaoComponent() {
       </button>
       <h2 className="text-2xl font-bold mb-4">Gerenciar Empreendimentos</h2>
 
-      {/* Lista de empreendimentos em tabela */}
       <table className="w-full bg-white rounded-lg shadow overflow-hidden mb-6">
         <thead className="bg-gray-100">
           <tr>
@@ -199,15 +238,41 @@ export default function ConfiguracaoComponent() {
               <td className="px-4 py-2">{e.vagas ?? '-'}</td>
               <td className="px-4 py-2">{e.area_m2 ?? '-'}</td>
               <td className="px-4 py-2 space-x-2">
-                {/* Se quiser implementar editar/remover daqui depois */}
+                <button
+                  onClick={() => {
+                    setEditingEmp(e);
+                    setShowEditEmp(true);
+                  }}
+                  className="text-blue-600 hover:underline text-sm"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!confirm('Deseja remover este empreendimento?')) return;
+                    const res = await fetch(`/api/empreendimentos/${e.id}`, {
+                      method: 'DELETE',
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                      // atualiza imediatamente a lista local
+                      setEmps(prev => prev.filter(x => x.id !== e.id));
+                    }
+                  }}
+                  className="text-red-600 hover:underline text-sm"
+                >
+                  Remover
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <button onClick={() => setShowAddEmp(true)}
-        className="bg-[#eb194b] text-white font-semibold px-6 py-2 rounded hover:bg-[#c3133d] transition">
+      <button
+        onClick={() => setShowAddEmp(true)}
+        className="bg-[#eb194b] text-white font-semibold px-6 py-2 rounded hover:bg-[#c3133d] transition"
+      >
         Novo Empreendimento
       </button>
 
@@ -218,6 +283,18 @@ export default function ConfiguracaoComponent() {
           onAdded={newE => {
             setEmps(prev => [newE, ...prev]);
             setShowAddEmp(false);
+          }}
+        />
+      )}
+
+      {showEditEmp && editingEmp && (
+        <EditEmpreendimentoModal
+          isOpen
+          empreendimento={editingEmp}
+          onClose={() => setShowEditEmp(false)}
+          onUpdated={upd => {
+            setEmps(prev => prev.map(x => (x.id === upd.id ? upd : x)));
+            setShowEditEmp(false);
           }}
         />
       )}
