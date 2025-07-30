@@ -15,8 +15,8 @@ _dynamodb_resource = boto3.resource(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY
 )
 
+# Tabela de usuários
 usuarios_table = _dynamodb_resource.Table("usuarios")
-dynamodb_table_usuarios = usuarios_table
 
+# Tabela de empreendimentos
 empreendimentos_table = _dynamodb_resource.Table("empreendimentos")
-dynamodb_table_empreendimentos = empreendimentos_table

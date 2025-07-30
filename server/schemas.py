@@ -3,6 +3,8 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
+# —————— Usuários ——————
+
 class UserCreate(BaseModel):
     nome: str
     cpf: str
@@ -34,8 +36,14 @@ class UserUpdate(BaseModel):
     cargo: Optional[str] = None
     role: Optional[str] = None
 
+class UsersResponse(BaseModel):
+    users: List[UserOut]
+
+
+# —————— Empreendimentos ——————
+
 class EmpreendimentoCreate(BaseModel):
-    id: Optional[str] = None
+    # ao criar, o cliente não envia o id
     nome: str
     tipo_imovel: str
     dormitorios: Optional[int] = None
@@ -46,13 +54,15 @@ class EmpreendimentoCreate(BaseModel):
     estagio: Optional[str] = None
     endereco: Optional[str] = None
     bairro: Optional[str] = None
+    cidade: Optional[str] = None
     incorporador: Optional[str] = None
     coordenador: Optional[str] = None
     link_book: Optional[str] = None
     link_tabela: Optional[str] = None
-    ngc: Optional[int] = None  # campo extra
+    ngc: Optional[int] = None
 
 class EmpreendimentoOut(BaseModel):
+    # ao devolver, sempre há um id
     id: str
     nome: str
     tipo_imovel: str
@@ -64,10 +74,30 @@ class EmpreendimentoOut(BaseModel):
     estagio: Optional[str] = None
     endereco: Optional[str] = None
     bairro: Optional[str] = None
+    cidade: Optional[str] = None
     incorporador: Optional[str] = None
     coordenador: Optional[str] = None
     link_book: Optional[str] = None
     link_tabela: Optional[str] = None
+    ngc: Optional[int] = None
 
-class UsersResponse(BaseModel):
-    users: List[UserOut]
+class EmpreendimentoUpdate(BaseModel):
+    nome: Optional[str] = None
+    tipo_imovel: Optional[str] = None
+    dormitorios: Optional[int] = None
+    suites: Optional[int] = None
+    vagas: Optional[int] = None
+    area_m2: Optional[float] = None
+    data_entrega: Optional[str] = None
+    estagio: Optional[str] = None
+    endereco: Optional[str] = None
+    bairro: Optional[str] = None
+    cidade: Optional[str] = None
+    incorporador: Optional[str] = None
+    coordenador: Optional[str] = None
+    link_book: Optional[str] = None
+    link_tabela: Optional[str] = None
+    ngc: Optional[int] = None
+
+class EmpreendimentosResponse(BaseModel):
+    empreendimentos: List[EmpreendimentoOut]

@@ -1,4 +1,3 @@
-# main.py
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -13,23 +12,24 @@ if not SECRET_KEY or not ALGORITHM:
 
 app = FastAPI(title="Sistema Lopes Bahia Backend")
 
+# Permite que o frontend em localhost:3000 acesse a API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
-allow_credentials=True,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-from routes.auth         import router as auth_router
-from routes.protected    import router as protected_router
-from routes.videos       import router as videos_router
-from routes.empreendimentos import router as emp_router
+from routes.auth              import router as auth_router
+from routes.protected         import router as protected_router
+from routes.videos            import router as videos_router
+from routes.empreendimentos   import router as emp_router
 
-app.include_router(auth_router)
-app.include_router(protected_router, prefix="/area-segura")
-app.include_router(videos_router,    prefix="/videos")
-app.include_router(emp_router,       prefix="/empreendimentos")
+app.include_router(auth_router,            tags=["auth"])
+app.include_router(protected_router, prefix="/area-segura",   tags=["protected"])
+app.include_router(videos_router,    prefix="/videos",        tags=["videos"])
+app.include_router(emp_router,        tags=["empreendimentos"])
 
 @app.get("/", tags=["status"])
 def root():
