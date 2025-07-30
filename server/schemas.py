@@ -1,5 +1,7 @@
+# server/schemas.py
+
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class UserCreate(BaseModel):
     nome: str
@@ -22,10 +24,15 @@ class UserOut(BaseModel):
     nome: str
     cpf: str
     cargo: str
-    role: str
+    role: Optional[str] = None
 
 class TokenWithUser(Token):
     usuario: UserOut
+
+class UserUpdate(BaseModel):
+    nome: Optional[str] = None
+    cargo: Optional[str] = None
+    role: Optional[str] = None
 
 class EmpreendimentoCreate(BaseModel):
     id: Optional[str] = None
@@ -43,6 +50,7 @@ class EmpreendimentoCreate(BaseModel):
     coordenador: Optional[str] = None
     link_book: Optional[str] = None
     link_tabela: Optional[str] = None
+    ngc: Optional[int] = None  # campo extra
 
 class EmpreendimentoOut(BaseModel):
     id: str
@@ -60,3 +68,6 @@ class EmpreendimentoOut(BaseModel):
     coordenador: Optional[str] = None
     link_book: Optional[str] = None
     link_tabela: Optional[str] = None
+
+class UsersResponse(BaseModel):
+    users: List[UserOut]

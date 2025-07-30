@@ -26,7 +26,7 @@ from routes.protected    import router as protected_router
 from routes.videos       import router as videos_router
 from routes.empreendimentos import router as emp_router
 
-app.include_router(auth_router,     prefix="/auth")
+app.include_router(auth_router)
 app.include_router(protected_router, prefix="/area-segura")
 app.include_router(videos_router,    prefix="/videos")
 app.include_router(emp_router,       prefix="/empreendimentos")

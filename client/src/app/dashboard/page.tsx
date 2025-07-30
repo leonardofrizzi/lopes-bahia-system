@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -10,6 +11,7 @@ import LinksUteisComponent from '@/components/dashboard/LinksUteisComponent';
 import EmDesenvolvimentoComponent from '@/components/dashboard/EmDesenvolvimentoComponent';
 import CapacitacaoComponent from '@/components/dashboard/CapacitacaoComponent';
 import OfertaAtiva from '@/components/dashboard/OfertaAtiva';
+import ConfiguracaoComponent from '@/components/dashboard/ConfiguracaoComponent';
 
 interface UsuarioLogado {
   id: string;
@@ -21,7 +23,6 @@ interface UsuarioLogado {
 interface MenuCardProps {
   title: string;
   imageSrc: string;
-  componentName: ActiveComponentType;
   onClick: () => void;
 }
 
@@ -73,7 +74,7 @@ export default function DashboardPage() {
     }
 
     setLoading(false);
-  }, []);
+  }, [router]);
 
   if (loading) return null;
 
@@ -121,27 +122,21 @@ export default function DashboardPage() {
             key={item.title}
             title={item.title}
             imageSrc={item.imageSrc}
-            componentName={item.componentName as ActiveComponentType}
-            onClick={() => setActiveComponent(item.componentName as ActiveComponentType)}
+            onClick={() => setActiveComponent(item.componentName)}
           />
         ))}
       </div>
     </div>
   );
 
-
-  const MarketingComponent = () => <EmDesenvolvimentoComponent titulo="Marketing" />;
-  const ConfiguracaoComponent = () => <EmDesenvolvimentoComponent titulo="Configuração" />;
-  const OfertaAtivaComponent = () => <OfertaAtiva titulo="Oferta Ativa" />;
-
   const renderContent = () => {
     switch (activeComponent) {
       case 'empreendimentos':
-        return <EmpreendimentosComponent titulo="Empreendimentos" />;
+        return <EmpreendimentosComponent  />;
       case 'oferta-ativa':
-        return <OfertaAtivaComponent />;
+        return <OfertaAtiva />;
       case 'marketing':
-        return <MarketingComponent />;
+        return <EmDesenvolvimentoComponent titulo="Marketing" />;
       case 'capacitacao':
         return <CapacitacaoComponent />;
       case 'links-uteis':
@@ -164,15 +159,9 @@ export default function DashboardPage() {
             <Sidebar />
           </div>
         )}
-        {activeComponent === 'home' ? (
-          <main className="flex-1 overflow-y-auto p-6">
-            {renderContent()}
-          </main>
-        ) : (
-          <main className="flex-1 overflow-auto">
-            {renderContent()}
-          </main>
-        )}
+        <main className={`flex-1 overflow-${activeComponent === 'home' ? 'y-auto p-6' : 'auto'}`}>
+          {renderContent()}
+        </main>
       </div>
     </div>
   );
